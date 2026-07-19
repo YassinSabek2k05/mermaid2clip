@@ -55,6 +55,22 @@ export default function App() {
     return () => clearTimeout(t)
   }, [toast])
 
+  // Stop the Escape key from closing the installed PWA (Brave/Chrome
+  // standalone). CodeMirror handles its own Escape (e.g. Vim mode) and stops
+  // propagation, so this only fires when the editor hasn't consumed it.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      e.preventDefault()
+      // Only close the guide when not typing in the editor, so a Vim user's
+      // Esc (exit insert mode) doesn't also dismiss the guide.
+      const inEditor = (e.target as Element | null)?.closest?.('.cm-editor')
+      if (!inEditor) setGuideOpen((open) => (open ? false : open))
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
   // Persist the code so a reload keeps your work.
   useEffect(() => {
     try {
@@ -121,12 +137,27 @@ export default function App() {
   const handleCopy = useCallback(async () => {
     const svgEl = getSvgEl()
     if (!svgEl) return showToast('Render a diagram first', 'err')
+    if (typeof ClipboardItem === 'undefined' || !navigator.clipboard?.write) {
+      return showToast('Clipboard not supported here — use Download PNG', 'err')
+    }
     try {
-      const blob = await svgElementToPngBlob(svgEl)
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+      // Pass the blob Promise straight into ClipboardItem so the write is
+      // issued synchronously within the click's transient activation. Samsung
+      // Internet strictly enforces this and silently rejects if the async PNG
+      // conversion runs *before* clipboard.write().
+      const item = new ClipboardItem({ 'image/png': svgElementToPngBlob(svgEl) })
+      await navigator.clipboard.write([item])
       showToast('Image copied to clipboard', 'ok')
     } catch {
-      showToast('Copy blocked — try Download instead', 'err')
+      // Fallback for engines that don't accept a Promise inside ClipboardItem.
+      try {
+        const blob = await svgElementToPngBlob(svgEl)
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+        showToast('Image copied to clipboard', 'ok')
+      } catch (err) {
+        const name = err instanceof Error ? err.name : ''
+        showToast(`Copy failed${name ? ` (${name})` : ''} — use Download PNG`, 'err')
+      }
     }
   }, [getSvgEl, showToast])
 

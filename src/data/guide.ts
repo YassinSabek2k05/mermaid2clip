@@ -341,6 +341,82 @@ Client->>API: GET /me (Bearer token)`,
     ],
   },
   {
+    id: 'arrows',
+    title: 'Arrows',
+    blurb: 'Every UML class relation. Use these inside a classDiagram.',
+    snippets: [
+      {
+        label: 'All relations',
+        description: 'A class diagram showing each relation type at once.',
+        template: true,
+        code: `classDiagram
+    Animal <|-- Dog : inheritance
+    Vehicle <|.. Car : realization
+    Car *-- Engine : composition
+    Team o-- Player : aggregation
+    Driver --> Car : association
+    Order ..> Payment : dependency
+    NodeA -- NodeB : link
+    Customer "1" --> "*" Order : places`,
+      },
+      {
+        label: 'Inheritance',
+        description: 'Child is a kind of Parent. Hollow triangle points to the parent.',
+        code: `Parent <|-- Child`,
+      },
+      {
+        label: 'Realization',
+        description: 'Class implements an interface. Dashed line, hollow triangle.',
+        code: `Interface <|.. Implementation`,
+      },
+      {
+        label: 'Composition',
+        description: 'Part cannot exist without the whole. Filled diamond on the whole.',
+        code: `Whole *-- Part`,
+      },
+      {
+        label: 'Aggregation',
+        description: 'Whole references parts that can exist on their own. Hollow diamond.',
+        code: `Whole o-- Part`,
+      },
+      {
+        label: 'Association',
+        description: 'One class knows about / uses another. Solid arrow.',
+        code: `Source --> Target`,
+      },
+      {
+        label: 'Bidirectional',
+        description: 'An association navigable in both directions.',
+        code: `ClassA <--> ClassB`,
+      },
+      {
+        label: 'Dependency',
+        description: 'One class depends on another. Dashed arrow.',
+        code: `Client ..> Service`,
+      },
+      {
+        label: 'Solid link',
+        description: 'A plain connection with no arrowhead.',
+        code: `ClassA -- ClassB`,
+      },
+      {
+        label: 'Dashed link',
+        description: 'A plain dashed connection with no arrowhead.',
+        code: `ClassA .. ClassB`,
+      },
+      {
+        label: 'Labelled relation',
+        description: 'Add a label describing the relationship.',
+        code: `Order --> Product : contains`,
+      },
+      {
+        label: 'Multiplicity',
+        description: 'Cardinality at each end (1, *, 0..1, 1..*).',
+        code: `Customer "1" --> "*" Order : places`,
+      },
+    ],
+  },
+  {
     id: 'architecture',
     title: 'Architecture',
     blurb: 'Cloud services and infrastructure grouped into systems.',
