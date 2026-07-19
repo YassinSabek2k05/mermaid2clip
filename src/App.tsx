@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Header } from './components/Header'
-import { Editor } from './components/Editor'
+import { Editor, type EditorHandle } from './components/Editor'
 import { Preview } from './components/Preview'
 import { Toolbar } from './components/Toolbar'
 import { Guide } from './components/Guide'
@@ -14,6 +14,7 @@ interface Toast {
 }
 
 const STORAGE_KEY = 'mermaid2clip:code'
+const VIM_KEY = 'mermaid2clip:vim'
 
 function loadInitialCode(): string {
   try {
@@ -23,15 +24,24 @@ function loadInitialCode(): string {
   }
 }
 
+function loadInitialVim(): boolean {
+  try {
+    return localStorage.getItem(VIM_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
 export default function App() {
   const [code, setCode] = useState(loadInitialCode)
   const [svg, setSvg] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [rendering, setRendering] = useState(false)
   const [guideOpen, setGuideOpen] = useState(() => window.innerWidth >= 1100)
+  const [vimEnabled, setVimEnabled] = useState(loadInitialVim)
   const [toast, setToast] = useState<Toast | null>(null)
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const editorRef = useRef<EditorHandle>(null)
   const svgHostRef = useRef<HTMLDivElement>(null)
 
   const showToast = useCallback((message: string, kind: ToastKind) => {
@@ -52,6 +62,15 @@ export default function App() {
       /* storage may be unavailable in private mode */
     }
   }, [code])
+
+  // Remember the Vim preference.
+  useEffect(() => {
+    try {
+      localStorage.setItem(VIM_KEY, vimEnabled ? '1' : '0')
+    } catch {
+      /* storage may be unavailable in private mode */
+    }
+  }, [vimEnabled])
 
   // Debounced live render.
   useEffect(() => {
@@ -78,39 +97,18 @@ export default function App() {
 
   const insertSnippet = useCallback(
     (snippet: Snippet) => {
-      const el = textareaRef.current
-
       if (snippet.template) {
         const replace =
-          !code.trim() ||
-          window.confirm('Replace the current diagram with this template?')
+          !code.trim() || window.confirm('Replace the current diagram with this template?')
         if (!replace) return
         setCode(snippet.code)
         showToast(`${snippet.label} inserted`, 'ok')
-        requestAnimationFrame(() => el?.focus())
+        requestAnimationFrame(() => editorRef.current?.focus())
         return
       }
 
-      if (!el) {
-        setCode((c) => (c ? `${c}\n${snippet.code}` : snippet.code))
-        return
-      }
-
-      const start = el.selectionStart
-      const end = el.selectionEnd
-      const before = code.slice(0, start)
-      const after = code.slice(end)
-      const needsLeadingNewline = before.length > 0 && !before.endsWith('\n')
-      const insertText = (needsLeadingNewline ? '\n' : '') + snippet.code
-      const next = before + insertText + after
-      setCode(next)
+      editorRef.current?.insertAtCursor(snippet.code)
       showToast('Snippet added', 'ok')
-
-      const caret = before.length + insertText.length
-      requestAnimationFrame(() => {
-        el.focus()
-        el.setSelectionRange(caret, caret)
-      })
     },
     [code, showToast],
   )
@@ -150,7 +148,7 @@ export default function App() {
 
   const handleClear = useCallback(() => {
     setCode('')
-    requestAnimationFrame(() => textareaRef.current?.focus())
+    requestAnimationFrame(() => editorRef.current?.focus())
   }, [])
 
   const canExport = Boolean(svg) && !error
@@ -162,7 +160,13 @@ export default function App() {
       <div className="layout">
         <main className="workspace">
           <div className="pane pane-editor">
-            <Editor ref={textareaRef} value={code} onChange={setCode} />
+            <Editor
+              ref={editorRef}
+              value={code}
+              onChange={setCode}
+              vimEnabled={vimEnabled}
+              onToggleVim={() => setVimEnabled((v) => !v)}
+            />
             <Toolbar
               canExport={canExport}
               onCopy={handleCopy}

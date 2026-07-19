@@ -4,6 +4,8 @@ An installable web app for turning [Mermaid](https://mermaid.js.org/)
 diagram code into an image you can copy straight to your clipboard or download as
 a PNG — with a built-in **syntax guide** so you never have to memorise the syntax.
 
+**Live:** <https://mermaid2clip.yassinsabek.dev>
+
 ## Features
 
 - **Live preview** — diagrams re-render as you type.
@@ -11,6 +13,8 @@ a PNG — with a built-in **syntax guide** so you never have to memorise the syn
 - **Syntax guide** — clickable snippets and full templates for flowcharts,
   sequence, class, state, ER, Gantt, pie, mindmap, git graph and user-journey
   diagrams. Click to insert at the cursor; no memorising required.
+- **Code editor** — CodeMirror with line numbers, and an optional **Vim mode**
+  (toggle in the editor header) with a modal status bar. Your choice is remembered.
 - **PWA** — installable and works offline once loaded.
 - Your latest diagram is saved locally between sessions.
 
@@ -25,14 +29,13 @@ npm run build   # production build into dist/
 
 ## Deployment
 
-Pushing to `main` builds and publishes to GitHub Pages via
-`.github/workflows/deploy.yml`. Enable it once under
-**Settings → Pages → Build and deployment → Source: GitHub Actions**.
+Deployed with **Cloudflare Workers** (static assets) on the custom domain
+<https://mermaid2clip.yassinsabek.dev>.
 
-The app is served from `/mermaid2clip/`; change `base` in `vite.config.ts` if you
-rename the repository or use a custom domain.
+Because the app is served from the domain root, `base` in `vite.config.ts` must
+be `/` (not a subpath).
 
 ## Tech
 
-React + TypeScript + Vite, `mermaid` for rendering, `vite-plugin-pwa` for the
-service worker and manifest.
+React + TypeScript + Vite, `mermaid` for rendering, CodeMirror + `@replit/codemirror-vim`
+for the editor, and `vite-plugin-pwa` for the service worker and manifest.

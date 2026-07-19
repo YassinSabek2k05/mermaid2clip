@@ -2,8 +2,8 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// Project is served from https://<user>.github.io/mermaid2clip/
-const BASE = '/mermaid2clip/'
+// Served from the domain root: https://mermaid2clip.yassinsabek.dev/
+const BASE = '/'
 
 export default defineConfig({
   base: BASE,
