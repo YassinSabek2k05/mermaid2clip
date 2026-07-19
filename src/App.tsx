@@ -152,6 +152,16 @@ export default function App() {
     requestAnimationFrame(() => editorRef.current?.focus())
   }, [])
 
+  const handleCopyCode = useCallback(async () => {
+    if (!code.trim()) return showToast('Nothing to copy', 'err')
+    try {
+      await navigator.clipboard.writeText(code)
+      showToast('Code copied to clipboard', 'ok')
+    } catch {
+      showToast('Copy blocked — select and copy manually', 'err')
+    }
+  }, [code, showToast])
+
   const handleSaveCode = useCallback(() => {
     if (!code.trim()) return showToast('Nothing to save', 'err')
     const blob = new Blob([code], { type: 'text/plain;charset=utf-8' })
@@ -209,6 +219,9 @@ export default function App() {
               ref={editorRef}
               value={code}
               onChange={setCode}
+              hasContent={Boolean(code.trim())}
+              onCopyAll={handleCopyCode}
+              onClear={handleClear}
               vimEnabled={vimEnabled}
               onToggleVim={() => setVimEnabled((v) => !v)}
             />
@@ -219,7 +232,6 @@ export default function App() {
               onDownload={handleDownload}
               onSave={handleSaveCode}
               onImport={handleImportClick}
-              onClear={handleClear}
             />
             <input
               ref={fileInputRef}

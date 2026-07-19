@@ -184,11 +184,43 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .editor-head .panel-label {
   margin-bottom: 0;
+}
+
+.editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.editor-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.editor-action:hover:not(:disabled) {
+  color: var(--paper);
+  border-color: var(--rust-2);
+}
+
+.editor-action:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .vim-toggle {

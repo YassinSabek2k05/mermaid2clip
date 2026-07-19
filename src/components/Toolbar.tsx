@@ -5,18 +5,9 @@ interface ToolbarProps {
   onDownload: () => void
   onSave: () => void
   onImport: () => void
-  onClear: () => void
 }
 
-export function Toolbar({
-  canExport,
-  canSave,
-  onCopy,
-  onDownload,
-  onSave,
-  onImport,
-  onClear,
-}: ToolbarProps) {
+export function Toolbar({ canExport, canSave, onCopy, onDownload, onSave, onImport }: ToolbarProps) {
   return (
     <div className="toolbar">
       <button className="btn primary" onClick={onCopy} disabled={!canExport}>
@@ -65,9 +56,6 @@ export function Toolbar({
           />
         </svg>
         Import
-      </button>
-      <button className="btn ghost" onClick={onClear}>
-        Clear
       </button>
     </div>
   )

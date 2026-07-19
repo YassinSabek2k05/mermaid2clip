@@ -98,6 +98,114 @@ end`,
     ],
   },
   {
+    id: 'styling',
+    title: 'Styling',
+    blurb: 'Colour and style nodes, links and groups. Works in flowchart, class and state diagrams.',
+    snippets: [
+      {
+        label: 'Full example',
+        description: 'A styled flowchart using classDef, inline ::: and class assignment.',
+        template: true,
+        code: `flowchart TB
+    classDef sensor fill:#CB5A2B,stroke:#1C2B4A,color:#fff,stroke-width:2px
+    classDef db fill:#1C2B4A,stroke:#CB5A2B,color:#fff,stroke-width:2px
+    classDef ok fill:#4CA36A,stroke:#333,color:#fff
+    classDef err fill:#D9534F,stroke:#333,color:#fff
+
+    A([Race Start Trigger]) --> B{Timing Source?}
+
+    subgraph Ingestion["Timing Ingestion Layer"]
+        B -->|Transponder| C[/Loop Sensor API/]
+        B -->|Manual| D[/Scrutineer Entry/]
+        C --> E[[Packet Queue]]
+        D --> E
+        E --> F{Checksum Valid?}
+        F -->|No| G[Dead Letter Queue]:::err
+        F -->|Yes| H(Normalize Timestamp)
+    end
+
+    subgraph Processing["Result Processing"]
+        H --> I{Duplicate Lap?}
+        I -->|Yes| J[Discard]:::err
+        I -->|No| K[Compute Lap Delta]
+        K --> L{Within Track Limits?}
+        L -->|No| M[Flag for Review]
+        L -->|Yes| N[Confirm Lap]:::ok
+        M --> O((Steward Queue))
+        O --> P{Steward Decision}
+        P -->|Approve| N
+        P -->|Reject| J
+    end
+
+    subgraph Storage["Persistence"]
+        N --> Q[(TimescaleDB<br>lap_times)]:::db
+        N --> R[(Postgres<br>standings)]:::db
+        Q --> S{{Recompute Standings}}
+        R --> S
+    end
+
+    S --> T[/Championship API/]
+    T --> U([Live Leaderboard])
+    G -.retry.-> C
+
+    class C,D sensor`,
+      },
+      {
+        label: 'Define a class',
+        description: 'A reusable style. Properties: fill, stroke, color, stroke-width, stroke-dasharray.',
+        code: `classDef important fill:#CB5A2B,stroke:#1C2B4A,color:#fff,stroke-width:2px`,
+      },
+      {
+        label: 'Apply inline (:::)',
+        description: 'Attach a class to a node where you declare it.',
+        code: `A[Node]:::important`,
+      },
+      {
+        label: 'Apply with class',
+        description: 'Assign a class to one or more existing nodes.',
+        code: `class A,B important`,
+      },
+      {
+        label: 'Style one node',
+        description: 'Style a single node directly, without a class.',
+        code: `style A fill:#1C2B4A,stroke:#CB5A2B,color:#fff`,
+      },
+      {
+        label: 'Dashed border',
+        description: 'A dashed outline via stroke-dasharray.',
+        code: `style A stroke-dasharray: 5 5`,
+      },
+      {
+        label: 'Style a link',
+        description: 'Colour a link by its index (links are numbered from 0).',
+        code: `linkStyle 0 stroke:#CB5A2B,stroke-width:2px`,
+      },
+      {
+        label: 'Style all links',
+        description: 'Apply one style to every link.',
+        code: `linkStyle default stroke:#9fb0d1,stroke-width:1px`,
+      },
+      {
+        label: 'Style a subgraph',
+        description: 'Group nodes, then style the group by its id.',
+        code: `subgraph Group["My Group"]
+    A --> B
+end
+style Group fill:#243459,stroke:#33456f,color:#fff`,
+      },
+      {
+        label: 'Switch theme',
+        description: 'Put this on the first line to change the built-in theme (default, dark, neutral, forest).',
+        code: `%%{init: {'theme':'dark'}}%%`,
+      },
+      {
+        label: 'Theme variables',
+        description: 'Override individual theme colours (use theme base). Goes on the first line.',
+        code: `%%{init: {'theme':'base', 'themeVariables': {'primaryColor':'#CB5A2B','lineColor':'#1C2B4A','primaryTextColor':'#fff'}}}%%`,
+      },
+    ],
+  },
+  {
     id: 'sequence',
     title: 'Sequence',
     blurb: 'Messages exchanged between participants over time.',

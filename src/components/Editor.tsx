@@ -14,6 +14,9 @@ export interface EditorHandle {
 interface EditorProps {
   value: string
   onChange: (value: string) => void
+  hasContent: boolean
+  onCopyAll: () => void
+  onClear: () => void
   vimEnabled: boolean
   onToggleVim: () => void
 }
@@ -74,7 +77,7 @@ const editorTheme = EditorView.theme(
 )
 
 export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
-  { value, onChange, vimEnabled, onToggleVim },
+  { value, onChange, hasContent, onCopyAll, onClear, vimEnabled, onToggleVim },
   ref,
 ) {
   const hostRef = useRef<HTMLDivElement>(null)
@@ -160,15 +163,53 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     <div className="editor">
       <div className="editor-head">
         <span className="panel-label">Diagram code</span>
-        <button
-          type="button"
-          className={`vim-toggle ${vimEnabled ? 'is-active' : ''}`}
-          onClick={onToggleVim}
-          aria-pressed={vimEnabled}
-          title="Toggle Vim keybindings"
-        >
-          Vim
-        </button>
+        <div className="editor-actions">
+          <button
+            type="button"
+            className="editor-action"
+            onClick={onCopyAll}
+            disabled={!hasContent}
+            title="Copy all code to the clipboard"
+          >
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+              <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" strokeWidth="2" />
+              <path
+                d="M5 15V5a2 2 0 0 1 2-2h8"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+            Copy all
+          </button>
+          <button
+            type="button"
+            className="editor-action"
+            onClick={onClear}
+            disabled={!hasContent}
+            title="Clear the editor"
+          >
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+              <path
+                d="M6 7h12M9 7V5h6v2m-7 0 1 12h6l1-12"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Clear
+          </button>
+          <button
+            type="button"
+            className={`vim-toggle ${vimEnabled ? 'is-active' : ''}`}
+            onClick={onToggleVim}
+            aria-pressed={vimEnabled}
+            title="Toggle Vim keybindings"
+          >
+            Vim
+          </button>
+        </div>
       </div>
       <div className="cm-host" ref={hostRef} />
     </div>
