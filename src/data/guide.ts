@@ -158,6 +158,28 @@ else Failure
     A->>B: Retry
 end`,
       },
+      {
+        label: 'REST request',
+        description: 'A client calling an API endpoint.',
+        code: `Client->>API: GET /users/42`,
+      },
+      {
+        label: 'JSON response',
+        description: 'An API returning a status and body.',
+        code: `API-->>Client: 200 OK (JSON)`,
+      },
+      {
+        label: 'Auth flow',
+        description: 'Token exchange before a protected call.',
+        code: `Client->>Auth: POST /login
+Auth-->>Client: 200 { token }
+Client->>API: GET /me (Bearer token)`,
+      },
+      {
+        label: 'Error path',
+        description: 'A rejected request.',
+        code: `API-->>Client: 401 Unauthorized`,
+      },
     ],
   },
   {
@@ -207,6 +229,156 @@ end`,
         label: 'Association',
         description: 'A plain relationship with a label.',
         code: `Driver --> Car : drives`,
+      },
+    ],
+  },
+  {
+    id: 'architecture',
+    title: 'Architecture',
+    blurb: 'Cloud services and infrastructure grouped into systems.',
+    snippets: [
+      {
+        label: 'Full example',
+        description: 'A complete architecture diagram.',
+        template: true,
+        code: `architecture-beta
+    group api(cloud)[API]
+
+    service db(database)[Database] in api
+    service disk(disk)[Storage] in api
+    service server(server)[Server] in api
+
+    db:L -- R:server
+    disk:T -- B:server`,
+      },
+      {
+        label: 'Group',
+        description: 'A boxed system that holds services.',
+        code: `group api(cloud)[API]`,
+      },
+      {
+        label: 'Service',
+        description: 'A service placed inside a group. Icons: cloud, database, disk, internet, server.',
+        code: `service server(server)[Server] in api`,
+      },
+      {
+        label: 'Edge',
+        description: 'Link two services by their sides (L, R, T, B).',
+        code: `server:R -- L:db`,
+      },
+      {
+        label: 'Internet edge',
+        description: 'Connect an external entry point to a service.',
+        code: `service net(internet)[Internet]
+net:R --> L:server`,
+      },
+    ],
+  },
+  {
+    id: 'c4',
+    title: 'C4 model',
+    blurb: 'Software architecture at context and container level.',
+    snippets: [
+      {
+        label: 'Context (full)',
+        description: 'A C4 system context diagram.',
+        template: true,
+        code: `C4Context
+    title System context
+    Person(user, "Customer", "A user of the app")
+    System(app, "My App", "Delivers the service")
+    System_Ext(email, "Email System", "Sends notifications")
+
+    Rel(user, app, "Uses")
+    Rel(app, email, "Sends email via")`,
+      },
+      {
+        label: 'Container (full)',
+        description: 'A C4 container diagram with a boundary.',
+        template: true,
+        code: `C4Container
+    title Containers
+    Person(user, "Customer")
+    Container_Boundary(c, "My App") {
+        Container(web, "Web App", "React", "Serves the UI")
+        Container(api, "API", "Node.js", "Business logic")
+        ContainerDb(db, "Database", "PostgreSQL", "Stores data")
+    }
+    Rel(user, web, "Uses", "HTTPS")
+    Rel(web, api, "Calls", "JSON/HTTPS")
+    Rel(api, db, "Reads and writes")`,
+      },
+      {
+        label: 'Person',
+        description: 'A human actor.',
+        code: `Person(user, "Customer", "A user")`,
+      },
+      {
+        label: 'System',
+        description: 'A software system you own.',
+        code: `System(app, "My App", "Description")`,
+      },
+      {
+        label: 'External system',
+        description: 'A system outside your control.',
+        code: `System_Ext(email, "Email System")`,
+      },
+      {
+        label: 'Relationship',
+        description: 'A directed link with a label.',
+        code: `Rel(user, app, "Uses")`,
+      },
+      {
+        label: 'Boundary',
+        description: 'Group elements into a boundary.',
+        code: `Container_Boundary(c, "My App") {
+
+}`,
+      },
+    ],
+  },
+  {
+    id: 'block',
+    title: 'Block',
+    blurb: 'Simple system blocks laid out on a grid.',
+    snippets: [
+      {
+        label: 'Full example',
+        description: 'A complete block diagram.',
+        template: true,
+        code: `block-beta
+    columns 3
+    client["Client"] gateway["API Gateway"] service["Service"]
+    client --> gateway
+    gateway --> service`,
+      },
+      {
+        label: 'Columns',
+        description: 'Set how many blocks sit per row.',
+        code: `columns 3`,
+      },
+      {
+        label: 'Block',
+        description: 'A single labelled block.',
+        code: `api["API"]`,
+      },
+      {
+        label: 'Spacer',
+        description: 'Leave an empty grid cell.',
+        code: `space`,
+      },
+      {
+        label: 'Arrow',
+        description: 'Connect two blocks.',
+        code: `api --> db`,
+      },
+      {
+        label: 'Nested block',
+        description: 'A group of blocks inside one cell.',
+        code: `block:group
+    A
+    B
+end`,
       },
     ],
   },

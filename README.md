@@ -11,8 +11,9 @@ a PNG — with a built-in **syntax guide** so you never have to memorise the syn
 - **Live preview** — diagrams re-render as you type.
 - **Copy image / Download PNG** — high-resolution export on a white background.
 - **Syntax guide** — clickable snippets and full templates for flowcharts,
-  sequence, class, state, ER, Gantt, pie, mindmap, git graph and user-journey
-  diagrams. Click to insert at the cursor; no memorising required.
+  sequence (incl. REST/API flows), class, architecture, C4 model, block, state,
+  ER, Gantt, pie, mindmap, git graph and user-journey diagrams. Click to insert
+  at the cursor; no memorising required.
 - **Code editor** — CodeMirror with line numbers, and an optional **Vim mode**
   (toggle in the editor header) with a modal status bar. Your choice is remembered.
 - **PWA** — installable and works offline once loaded.
