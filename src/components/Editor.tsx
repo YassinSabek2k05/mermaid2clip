@@ -8,6 +8,8 @@ import { vim } from '@replit/codemirror-vim'
 export interface EditorHandle {
   /** Insert text at the caret, starting on a fresh line when needed. */
   insertAtCursor: (text: string) => void
+  /** Insert text exactly at the caret (used for paste). */
+  insertText: (text: string) => void
   focus: () => void
 }
 
@@ -16,6 +18,9 @@ interface EditorProps {
   onChange: (value: string) => void
   hasContent: boolean
   onCopyAll: () => void
+  onPaste: () => void
+  onSave: () => void
+  onImport: () => void
   onClear: () => void
   vimEnabled: boolean
   onToggleVim: () => void
@@ -77,7 +82,7 @@ const editorTheme = EditorView.theme(
 )
 
 export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
-  { value, onChange, hasContent, onCopyAll, onClear, vimEnabled, onToggleVim },
+  { value, onChange, hasContent, onCopyAll, onPaste, onSave, onImport, onClear, vimEnabled, onToggleVim },
   ref,
 ) {
   const hostRef = useRef<HTMLDivElement>(null)
@@ -152,6 +157,17 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         })
         view.focus()
       },
+      insertText(text: string) {
+        const view = viewRef.current
+        if (!view) return
+        const { from, to } = view.state.selection.main
+        view.dispatch({
+          changes: { from, to, insert: text },
+          selection: { anchor: from + text.length },
+          scrollIntoView: true,
+        })
+        view.focus()
+      },
       focus() {
         viewRef.current?.focus()
       },
@@ -163,53 +179,105 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     <div className="editor">
       <div className="editor-head">
         <span className="panel-label">Diagram code</span>
-        <div className="editor-actions">
-          <button
-            type="button"
-            className="editor-action"
-            onClick={onCopyAll}
-            disabled={!hasContent}
-            title="Copy all code to the clipboard"
-          >
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
-              <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" strokeWidth="2" />
-              <path
-                d="M5 15V5a2 2 0 0 1 2-2h8"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-            Copy all
-          </button>
-          <button
-            type="button"
-            className="editor-action"
-            onClick={onClear}
-            disabled={!hasContent}
-            title="Clear the editor"
-          >
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
-              <path
-                d="M6 7h12M9 7V5h6v2m-7 0 1 12h6l1-12"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Clear
-          </button>
-          <button
-            type="button"
-            className={`vim-toggle ${vimEnabled ? 'is-active' : ''}`}
-            onClick={onToggleVim}
-            aria-pressed={vimEnabled}
-            title="Toggle Vim keybindings"
-          >
-            Vim
-          </button>
-        </div>
+        <button
+          type="button"
+          className={`vim-toggle ${vimEnabled ? 'is-active' : ''}`}
+          onClick={onToggleVim}
+          aria-pressed={vimEnabled}
+          title="Toggle Vim keybindings"
+        >
+          Vim
+        </button>
+      </div>
+      <div className="editor-toolbar">
+        <button
+          type="button"
+          className="editor-action"
+          onClick={onCopyAll}
+          disabled={!hasContent}
+          title="Copy all code to the clipboard"
+        >
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+            <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" strokeWidth="2" />
+            <path
+              d="M5 15V5a2 2 0 0 1 2-2h8"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+          Copy all
+        </button>
+        <button
+          type="button"
+          className="editor-action"
+          onClick={onPaste}
+          title="Paste from the clipboard"
+        >
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+            <rect x="8" y="4" width="8" height="4" rx="1" stroke="currentColor" strokeWidth="2" />
+            <path
+              d="M9 6H6v14h12V6h-3"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          Paste
+        </button>
+        <button
+          type="button"
+          className="editor-action"
+          onClick={onSave}
+          disabled={!hasContent}
+          title="Save the diagram code as a .mmd file"
+        >
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+            <path
+              d="M5 4h11l3 3v13H5zM8 4v5h7"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinejoin="round"
+            />
+          </svg>
+          Save
+        </button>
+        <button
+          type="button"
+          className="editor-action"
+          onClick={onImport}
+          title="Load diagram code from a file"
+        >
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+            <path
+              d="M12 20V10m0 0 4 4m-4-4-4 4M5 5h14"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          Import
+        </button>
+        <button
+          type="button"
+          className="editor-action danger"
+          onClick={onClear}
+          disabled={!hasContent}
+          title="Clear the editor"
+        >
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+            <path
+              d="M6 7h12M9 7V5h6v2m-7 0 1 12h6l1-12"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          Clear
+        </button>
       </div>
       <div className="cm-host" ref={hostRef} />
     </div>

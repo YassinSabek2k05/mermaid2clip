@@ -162,6 +162,17 @@ export default function App() {
     }
   }, [code, showToast])
 
+  const handlePaste = useCallback(async () => {
+    try {
+      const text = await navigator.clipboard.readText()
+      if (!text) return showToast('Clipboard is empty', 'err')
+      editorRef.current?.insertText(text)
+      showToast('Pasted from clipboard', 'ok')
+    } catch {
+      showToast('Paste blocked — use Ctrl/Cmd+V instead', 'err')
+    }
+  }, [showToast])
+
   const handleSaveCode = useCallback(() => {
     if (!code.trim()) return showToast('Nothing to save', 'err')
     const blob = new Blob([code], { type: 'text/plain;charset=utf-8' })
@@ -221,18 +232,14 @@ export default function App() {
               onChange={setCode}
               hasContent={Boolean(code.trim())}
               onCopyAll={handleCopyCode}
+              onPaste={handlePaste}
+              onSave={handleSaveCode}
+              onImport={handleImportClick}
               onClear={handleClear}
               vimEnabled={vimEnabled}
               onToggleVim={() => setVimEnabled((v) => !v)}
             />
-            <Toolbar
-              canExport={canExport}
-              canSave={Boolean(code.trim())}
-              onCopy={handleCopy}
-              onDownload={handleDownload}
-              onSave={handleSaveCode}
-              onImport={handleImportClick}
-            />
+            <Toolbar canExport={canExport} onCopy={handleCopy} onDownload={handleDownload} />
             <input
               ref={fileInputRef}
               type="file"
