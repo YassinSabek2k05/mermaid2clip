@@ -25,6 +25,8 @@ const editorTheme = EditorView.theme(
       color: 'var(--paper)',
       border: '1px solid var(--line)',
       borderRadius: 'var(--radius)',
+      // Clip the Vim status panel so its corners follow the rounded box.
+      overflow: 'hidden',
       fontSize: '0.86rem',
     },
     '&.cm-focused': {

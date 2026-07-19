@@ -32,6 +32,14 @@ body,
   margin: 0;
 }
 
+html,
+body {
+  /* Lock the viewport: no page scroll or overscroll bounce, even in a
+     standalone PWA (Brave on Android would otherwise show a stray scrollbar). */
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 body {
   background:
     radial-gradient(1200px 600px at 100% -10%, rgba(203, 90, 43, 0.12), transparent 60%),
@@ -48,9 +56,12 @@ button {
 
 /* ---------- Layout shell ---------- */
 .app {
+  /* Pin to the visual viewport so the app box can never overflow and produce
+     a page-level scrollbar. inset covers the whole screen (safe-area aware). */
+  position: fixed;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  height: 100dvh;
   overflow: hidden;
 }
 
@@ -142,6 +153,7 @@ button {
   gap: 16px;
   padding: 16px 20px 20px;
   overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .pane {
@@ -436,9 +448,9 @@ button {
   position: fixed;
   top: 0;
   right: 0;
+  bottom: 0;
   z-index: 40;
   width: min(var(--guide-width), 100%);
-  height: 100dvh;
   display: flex;
   flex-direction: column;
   background: var(--ink-1);
@@ -524,6 +536,7 @@ button {
 .guide-body {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 14px 18px 22px;
 }
 
