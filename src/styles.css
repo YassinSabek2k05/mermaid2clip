@@ -717,6 +717,98 @@ button {
   }
 }
 
+/* ---------- Image popup (native copy) ---------- */
+.image-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(8, 14, 28, 0.72);
+  backdrop-filter: blur(3px);
+  animation: fade-in 0.15s ease;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.image-modal-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(560px, 100%);
+  max-height: 90dvh;
+  padding: 16px 18px 18px;
+  border-radius: var(--radius);
+  background: var(--ink-1);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.image-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.image-modal-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.image-modal-hint strong {
+  color: var(--paper);
+}
+
+.image-modal-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  background: #fff;
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  min-height: 0;
+}
+
+.image-modal-img {
+  max-width: 100%;
+  max-height: 60dvh;
+  object-fit: contain;
+  /* Enable the native long-press / drag-to-copy image menu on all devices. */
+  -webkit-touch-callout: default;
+  touch-action: auto;
+  user-select: auto;
+  -webkit-user-select: auto;
+  -webkit-user-drag: auto;
+}
+
+.image-modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.image-modal-actions .btn.ghost {
+  margin-left: 0;
+}
+
+.image-modal-actions a.btn {
+  text-decoration: none;
+}
+
 /* ---------- Responsive ---------- */
 @media (min-width: 1100px) {
   /* On wide screens the guide docks beside the content instead of overlaying. */

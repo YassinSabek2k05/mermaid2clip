@@ -1,10 +1,11 @@
 interface ToolbarProps {
   canExport: boolean
   onCopy: () => void
+  onPreview: () => void
   onDownload: () => void
 }
 
-export function Toolbar({ canExport, onCopy, onDownload }: ToolbarProps) {
+export function Toolbar({ canExport, onCopy, onPreview, onDownload }: ToolbarProps) {
   return (
     <div className="toolbar">
       <button className="btn primary" onClick={onCopy} disabled={!canExport}>
@@ -18,6 +19,18 @@ export function Toolbar({ canExport, onCopy, onDownload }: ToolbarProps) {
           />
         </svg>
         Copy image
+      </button>
+      <button className="btn" onClick={onPreview} disabled={!canExport}>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
+          <path
+            d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinejoin="round"
+          />
+          <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
+        </svg>
+        Preview image
       </button>
       <button className="btn" onClick={onDownload} disabled={!canExport}>
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">

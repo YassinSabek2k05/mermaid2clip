@@ -40,6 +40,7 @@ export default function App() {
   const [guideOpen, setGuideOpen] = useState(() => window.innerWidth >= 1100)
   const [vimEnabled, setVimEnabled] = useState(loadInitialVim)
   const [toast, setToast] = useState<Toast | null>(null)
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
 
   const editorRef = useRef<EditorHandle>(null)
   const svgHostRef = useRef<HTMLDivElement>(null)
@@ -62,6 +63,11 @@ export default function App() {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
       e.preventDefault()
+      // Close the image popup if it's open.
+      setImageUrl((old) => {
+        if (old) URL.revokeObjectURL(old)
+        return null
+      })
       // Only close the guide when not typing in the editor, so a Vim user's
       // Esc (exit insert mode) doesn't also dismiss the guide.
       const inEditor = (e.target as Element | null)?.closest?.('.cm-editor')
@@ -158,6 +164,32 @@ export default function App() {
         const name = err instanceof Error ? err.name : ''
         showToast(`Copy failed${name ? ` (${name})` : ''} — use Download PNG`, 'err')
       }
+    }
+  }, [getSvgEl, showToast])
+
+  const closeImage = useCallback(() => {
+    setImageUrl((old) => {
+      if (old) URL.revokeObjectURL(old)
+      return null
+    })
+  }, [])
+
+  useEffect(() => () => closeImage(), [closeImage])
+
+  // Open the rendered diagram as a real <img> in a popup so it can be copied
+  // natively (long-press / right-click → Copy image, or drag out). This is the
+  // only way to get an actual image onto the clipboard in Samsung Internet.
+  const handlePreviewImage = useCallback(async () => {
+    const svgEl = getSvgEl()
+    if (!svgEl) return showToast('Render a diagram first', 'err')
+    try {
+      const blob = await svgElementToPngBlob(svgEl)
+      setImageUrl((old) => {
+        if (old) URL.revokeObjectURL(old)
+        return URL.createObjectURL(blob)
+      })
+    } catch {
+      showToast('Could not build image', 'err')
     }
   }, [getSvgEl, showToast])
 
@@ -270,7 +302,12 @@ export default function App() {
               vimEnabled={vimEnabled}
               onToggleVim={() => setVimEnabled((v) => !v)}
             />
-            <Toolbar canExport={canExport} onCopy={handleCopy} onDownload={handleDownload} />
+            <Toolbar
+              canExport={canExport}
+              onCopy={handleCopy}
+              onPreview={handlePreviewImage}
+              onDownload={handleDownload}
+            />
             <input
               ref={fileInputRef}
               type="file"
@@ -291,6 +328,42 @@ export default function App() {
       </div>
 
       {toast && <div className={`toast toast-${toast.kind}`}>{toast.message}</div>}
+
+      {imageUrl && (
+        <div className="image-modal" onClick={closeImage}>
+          <div className="image-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="image-modal-head">
+              <span>Copy image</span>
+              <button className="icon-btn" onClick={closeImage} aria-label="Close">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                  <path
+                    d="M6 6l12 12M18 6L6 18"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </div>
+            <p className="image-modal-hint">
+              Long-press (or right-click) the image and choose <strong>“Copy image”</strong> — or
+              drag it out.
+            </p>
+            <div className="image-modal-stage">
+              {/* A real <img> so the browser's native menu offers Copy image. */}
+              <img className="image-modal-img" src={imageUrl} alt="Rendered diagram" />
+            </div>
+            <div className="image-modal-actions">
+              <a className="btn" href={imageUrl} download="diagram.png">
+                Download PNG
+              </a>
+              <button className="btn ghost" onClick={closeImage}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
