@@ -43,6 +43,7 @@ export default function App() {
 
   const editorRef = useRef<EditorHandle>(null)
   const svgHostRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const showToast = useCallback((message: string, kind: ToastKind) => {
     setToast({ message, kind })
@@ -151,6 +152,50 @@ export default function App() {
     requestAnimationFrame(() => editorRef.current?.focus())
   }, [])
 
+  const handleSaveCode = useCallback(() => {
+    if (!code.trim()) return showToast('Nothing to save', 'err')
+    const blob = new Blob([code], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'diagram.mmd'
+    a.click()
+    URL.revokeObjectURL(url)
+    showToast('Code saved', 'ok')
+  }, [code, showToast])
+
+  const handleImportClick = useCallback(() => fileInputRef.current?.click(), [])
+
+  const handleFileChosen = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      e.target.value = '' // allow re-importing the same file
+      if (!file) return
+
+      // Warn before discarding meaningful unsaved work.
+      const current = code.trim()
+      const hasWork = current.length > 0 && current !== DEFAULT_DIAGRAM.trim()
+      if (
+        hasWork &&
+        !window.confirm(
+          `Replace the current diagram with "${file.name}"? Your unsaved changes will be lost.`,
+        )
+      ) {
+        return
+      }
+
+      try {
+        const text = await file.text()
+        setCode(text)
+        showToast(`Imported ${file.name}`, 'ok')
+        requestAnimationFrame(() => editorRef.current?.focus())
+      } catch {
+        showToast('Could not read file', 'err')
+      }
+    },
+    [code, showToast],
+  )
+
   const canExport = Boolean(svg) && !error
 
   return (
@@ -169,9 +214,19 @@ export default function App() {
             />
             <Toolbar
               canExport={canExport}
+              canSave={Boolean(code.trim())}
               onCopy={handleCopy}
               onDownload={handleDownload}
+              onSave={handleSaveCode}
+              onImport={handleImportClick}
               onClear={handleClear}
+            />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".mmd,.mermaid,.txt,text/plain"
+              hidden
+              onChange={handleFileChosen}
             />
           </div>
           <div className="pane pane-preview">

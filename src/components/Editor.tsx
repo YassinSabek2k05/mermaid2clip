@@ -1,7 +1,8 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import { basicSetup } from 'codemirror'
-import { EditorView } from '@codemirror/view'
+import { EditorView, keymap } from '@codemirror/view'
 import { Compartment, EditorState } from '@codemirror/state'
+import { indentWithTab } from '@codemirror/commands'
 import { vim } from '@replit/codemirror-vim'
 
 export interface EditorHandle {
@@ -93,6 +94,8 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
           // vim() must come first so its keymaps take precedence.
           vimCompartment.current.of(vimEnabled ? [vim({ status: true })] : []),
           basicSetup,
+          // Keep Tab in the editor (indent) instead of moving focus away.
+          keymap.of([indentWithTab]),
           EditorView.lineWrapping,
           editorTheme,
           EditorView.updateListener.of((u) => {
